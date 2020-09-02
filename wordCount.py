@@ -1,44 +1,43 @@
+# Imported Libraries
 import sys
-import re         # regular expression tools
+import re
+import string
 
-inFile = sys.argv[1]  # the first text file
-outFile = sys.argv[2]
+input_file_name = sys.argv[1]
+output_file_name = sys.argv[2]
 
-# receive an string(word) and an array(alphabetH) where each word is stored.
-def putWord(word, alphabetH, wordsDict):
-    if word in alphabetH[ord(word[0])-97]:
-        wordsDict[word] = wordsDict[word] + 1
-    else:
-        alphabetH[ord(word[0])-97].append(word)
-        wordsDict[word] = 1
+dictionary = {}
 
+if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        print("Correct usage: wordCount.py <input text file> <output file>")
+        exit()
 
-# [[] for i in range
-alphabetH = [[], [], [], [], [], [], [], [], [], [], [], [],
-             [], [], [], [], [], [], [], [], [], [], [], [], [], []]
-wordsDict = {}
+    # attempt to open input file and write in it
+    with open(input_file_name, 'r') as inputFile:
+        for line in inputFile:
+            # Remove the leading spaces and newline character
+            line = line.strip()
 
-# Open text file with many words
-with open(inFile, 'r') as i:
-    for line in i:
-        line = line.strip()
-        if len(line) != 0:
-            words = re.split(r'\s|-|\'', line)
+            # Convert the characters in line to lowercase to avoid case mismatch
+            line = line.lower()
+            line = re.sub("-", " ", line)
+            # Remove the punctuation marks from the line and hy
+            line = re.sub(r"[,.;@#?!&$]+\ *", " ", line)
+
+            line = line.translate(line.maketrans("", "", string.punctuation))
+
+            # split line on whitespace and punctuation
+            words = re.split('[ \t]', line)
+
             for word in words:
-                if word != '':
-		                if ord(word[-1]) > 122 or ord(word[-1]) < 65:
-		                    word = word[:-1]
-		                if word.isalpha():
-		                    word = word.lower()
-                		    # print(word)
-		                    putWord(word, alphabetH, wordsDict)
-
-with open(outFile, 'w') as output:
-    for alpha in alphabetH:
-        alpha.sort()
-        for word in alpha:
-            output.write("%s %d\n" % (word, wordsDict[word]))
-    output.close()
-
-
-
+                if word == "":
+                    break
+                if word in dictionary:
+                    dictionary[word] = dictionary[word] + 1
+                else:
+                    dictionary[word] = 1
+    with open(output_file_name, "w")as outputFile:
+        for word in sorted(dictionary):
+            outputFile.write(word + " " + str(dictionary[word]) + "\n")
+    outputFile.close()
